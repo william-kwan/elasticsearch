@@ -36,11 +36,6 @@ CopySpec archiveFiles(String distributionType, String os, String architecture, b
       into('bin') {
         with binFiles(distributionType, isTestDistro)
       }
-      into("darwin".equals(os) ? 'jdk.app' : 'jdk') {
-        if (isTestDistro == false) {
-          with jdkFiles(project, os, architecture)
-        }
-      }
       into('') {
         from {
           dirPermissions {
