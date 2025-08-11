@@ -167,43 +167,9 @@ class ServerCli extends EnvironmentAwareCommand {
     ) throws Exception {
         assert secureSettingsLoader(env) instanceof KeyStoreLoader;
 
-        String autoConfigLibs = "modules/x-pack-core,modules/x-pack-security,lib/tools/security-cli";
-        Command cmd = loadTool("auto-configure-node", autoConfigLibs);
-        assert cmd instanceof EnvironmentAwareCommand;
-        @SuppressWarnings("raw")
-        var autoConfigNode = (EnvironmentAwareCommand) cmd;
-        final String[] autoConfigArgs;
-        if (options.has(enrollmentTokenOption)) {
-            autoConfigArgs = new String[] { "--enrollment-token", options.valueOf(enrollmentTokenOption) };
-        } else {
-            autoConfigArgs = new String[0];
-        }
-        OptionSet autoConfigOptions = autoConfigNode.parseOptions(autoConfigArgs);
+        // reload settings since auto security changed them
+        env = createEnv(options, processInfo);
 
-        boolean changed = true;
-        try (var autoConfigTerminal = new KeystorePasswordTerminal(terminal, keystorePassword.clone())) {
-            autoConfigNode.execute(autoConfigTerminal, autoConfigOptions, env, processInfo);
-        } catch (UserException e) {
-            boolean okCode = switch (e.exitCode) {
-                // these exit codes cover the cases where auto-conf cannot run but the node should NOT be prevented from starting as usual
-                // e.g. the node is restarted, is already configured in an incompatible way, or the file system permissions do not allow it
-                case ExitCodes.CANT_CREATE, ExitCodes.CONFIG, ExitCodes.NOOP -> true;
-                default -> false;
-            };
-            if (options.has(enrollmentTokenOption) == false && okCode) {
-                // we still want to print the error, just don't fail startup
-                if (e.getMessage() != null) {
-                    terminal.errorPrintln(e.getMessage());
-                }
-                changed = false;
-            } else {
-                throw e;
-            }
-        }
-        if (changed) {
-            // reload settings since auto security changed them
-            env = createEnv(options, processInfo);
-        }
         return env;
     }
 

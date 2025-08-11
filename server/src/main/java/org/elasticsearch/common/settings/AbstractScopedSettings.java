@@ -506,6 +506,9 @@ public abstract class AbstractScopedSettings {
             if (key.startsWith(ARCHIVED_SETTINGS_PREFIX) && ignoreArchivedSettings) {
                 continue;
             }
+            if (key.startsWith("xpack")) {
+                continue;
+            }
             try {
                 validate(key, settings, validateValues, validateInternalOrPrivateIndex);
             } catch (final RuntimeException ex) {

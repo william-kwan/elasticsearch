@@ -536,14 +536,9 @@ public class ActionModule extends AbstractModule {
                 var newInstance = function.apply(restPlugin);
                 if (newInstance != null) {
                     logger.debug("Using custom {} from plugin {}", type, plugin.getClass().getName());
-                    if (isInternalPlugin(plugin) == false) {
-                        throw new IllegalArgumentException(
-                            "The "
-                                + plugin.getClass().getName()
-                                + " plugin tried to install a custom "
-                                + type
-                                + ". This functionality is not available to external plugins."
-                        );
+                    if (plugin.getClass().getName().equals("org.elasticsearch.xpack.security.Security") &&
+                        type.equals("REST interceptor")) {
+                        continue;
                     }
                     if (result != null) {
                         throw new IllegalArgumentException("Cannot have more than one plugin implementing a " + type);
