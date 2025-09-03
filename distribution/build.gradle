@@ -248,7 +248,7 @@ configure(subprojects.findAll { ['archives', 'packages'].contains(it.name) }) {
 
   // Setup all required JDKs
   project.jdks {
-    ['darwin', 'windows', 'linux'].each { platform ->
+    ['darwin', 'windows'].each { platform ->
       (platform == 'linux' || platform == 'darwin' ? ['x64', 'aarch64'] : ['x64']).each { architecture ->
         "bundled_${platform}_${architecture}" {
           it.platform = platform
